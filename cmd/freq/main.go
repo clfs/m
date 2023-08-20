@@ -2,105 +2,92 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
-	"unicode"
 
-	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
 
 func main() {
 	log.SetFlags(0)
 
-	byFlag := flag.String("by", "line", "line, byte, or rune")
+	byFlag := flag.String("by", "line", "line, byte, rune, or word")
 	flag.Parse()
+
+	var splitFunc bufio.SplitFunc
 
 	switch *byFlag {
 	case "line":
-		m, err := LineFreq(os.Stdin)
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, k := range keysSortedByDescValue(m) {
-			fmt.Printf("%d\t%s\n", m[k], k)
-		}
+		splitFunc = bufio.ScanLines
 	case "byte":
-		m, err := ByteFreq(os.Stdin)
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, k := range keysSortedByDescValue(m) {
-			fmt.Printf("%d\t%02x\n", m[k], k)
-		}
+		splitFunc = bufio.ScanBytes
 	case "rune":
-		m, err := RuneFreq(os.Stdin)
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, k := range keysSortedByDescValue(m) {
-			fmt.Printf("%d\t%q\n", m[k], k)
-		}
+		splitFunc = bufio.ScanRunes
+	case "word":
+		splitFunc = bufio.ScanWords
 	default:
-		log.Fatalln("error: invalid -by flag")
+		log.Fatalln("error: invalid -by value")
 	}
-}
 
-func LineFreq(r io.Reader) (map[string]int, error) {
+	s := bufio.NewScanner(os.Stdin)
+	s.Split(splitFunc)
+
 	m := make(map[string]int)
-	s := bufio.NewScanner(r)
 	for s.Scan() {
 		m[s.Text()]++
 	}
 	if err := s.Err(); err != nil {
-		return nil, err
+		log.Fatalf("error: %v", err)
 	}
-	return m, nil
+
+	var format string
+
+	switch *byFlag {
+	case "line":
+		format = "%d\t%s\n"
+	case "byte":
+		format = "%d\t0x%02x\n"
+	case "rune":
+		format = "%d\t%q\n"
+	case "word":
+		format = "%d\t%s\n"
+	default:
+		panic("unreachable")
+	}
+
+	pairs := toPairs(m)
+	slices.SortFunc(pairs, cmp)
+
+	for _, e := range pairs {
+		fmt.Printf(format, e.count, e.value)
+	}
 }
 
-func ByteFreq(r io.Reader) (map[byte]int, error) {
-	m := make(map[byte]int)
-	br := bufio.NewReader(r)
-	for {
-		b, err := br.ReadByte()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return nil, err
-		}
-		m[b]++
-	}
-	return m, nil
+type pair struct {
+	count int
+	value string
 }
 
-func RuneFreq(r io.Reader) (map[rune]int, error) {
-	m := make(map[rune]int)
-	br := bufio.NewReader(r)
-	for {
-		rn, sz, err := br.ReadRune()
-		if rn == unicode.ReplacementChar && sz == 1 {
-			return nil, errors.New("invalid utf8")
+func cmp(a, b pair) int {
+	if a.count == b.count {
+		switch {
+		case a.value < b.value:
+			return 1
+		case a.value > b.value:
+			return -1
+		default:
+			return 0
 		}
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return nil, err
-		}
-		m[rn]++
 	}
-	return m, nil
+	return b.count - a.count
 }
 
-// keysSortedByDescValue returns the keys in map m sorted by descending value.
-func keysSortedByDescValue[K comparable](m map[K]int) []K {
-	keys := maps.Keys(m)
-	slices.SortFunc(keys, func(a, b K) int { return m[a] - m[b] })
-	slices.Reverse(keys)
-	return keys
+func toPairs(m map[string]int) []pair {
+	pairs := make([]pair, 0, len(m))
+	for k, v := range m {
+		pairs = append(pairs, pair{v, k})
+	}
+	return pairs
 }
