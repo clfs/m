@@ -70,12 +70,13 @@ type pair struct {
 	value string
 }
 
+// {3,"a"} > {2,"a"} > {2,"b"}
 func cmp(a, b pair) int {
 	if a.count == b.count {
 		switch {
-		case a.value < b.value:
-			return 1
 		case a.value > b.value:
+			return 1
+		case a.value < b.value:
 			return -1
 		default:
 			return 0

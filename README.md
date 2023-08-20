@@ -5,4 +5,4 @@ A monorepo.
 
 path | description
 --- | ---
-`cmd/freq` | Compute frequency distributions from standard input.
+[`cmd/freq`](./cmd/freq) | Compute frequency distributions from standard input.
