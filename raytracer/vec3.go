@@ -84,6 +84,5 @@ func (v *Vec3) Cross(v0, v1 *Vec3) *Vec3 {
 
 // Unit sets v to the unit vector of v0. It returns v.
 func (v *Vec3) Unit(v0 *Vec3) *Vec3 {
-	v0.SDiv(v0, v0.Mag())
-	return v
+	return v.SDiv(v0, v0.Mag())
 }
