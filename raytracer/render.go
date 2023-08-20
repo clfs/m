@@ -16,6 +16,7 @@ type Config struct {
 func Render(c Config) image.Image {
 	img := image.NewRGBA(image.Rect(0, 0, c.ImageWidth, c.ImageHeight))
 	for j := 0; j < c.ImageHeight; j++ {
+		log.Printf("Scanlines remaining: %d", c.ImageHeight-j)
 		for i := 0; i < c.ImageWidth; i++ {
 			r := float64(i) / float64(c.ImageWidth-1)
 			g := float64(j) / float64(c.ImageHeight-1)
