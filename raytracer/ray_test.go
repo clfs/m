@@ -1,43 +1,28 @@
 package raytracer
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/clfs/m/math/f64"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+)
 
 func TestRay_At(t *testing.T) {
 	cases := []struct {
-		in   Ray
-		t    float64
-		want Vec3
+		r    Ray
+		tt   float64
+		want f64.Vec3
 	}{
-		{
-			Ray{
-				Origin:    Vec3{0, 0, 0},
-				Direction: Vec3{1, 0, 0},
-			},
-			1,
-			Vec3{1, 0, 0},
-		},
-		{
-			Ray{
-				Origin:    Vec3{0, 0, 0},
-				Direction: Vec3{1, 1, 1},
-			},
-			1,
-			Vec3{1, 1, 1},
-		},
-		{
-			Ray{
-				Origin:    Vec3{0, 0, 0},
-				Direction: Vec3{1, 1, 1},
-			},
-			2,
-			Vec3{2, 2, 2},
-		},
+		{Ray{f64.Vec3{0, 0, 0}, f64.Vec3{1, 0, 0}}, 0, f64.Vec3{0, 0, 0}},
+		{Ray{f64.Vec3{1, 2, 3}, f64.Vec3{-4, 5, 8}}, 3, f64.Vec3{-11, 17, 27}},
 	}
 
-	for i, tc := range cases {
-		got := *tc.in.At(tc.t)
-		if tc.want != got {
-			t.Errorf("#%d: want %v, got %v", i, tc.want, got)
+	for _, tc := range cases {
+		got := tc.r.At(tc.tt)
+		diff := cmp.Diff(tc.want, got, cmpopts.EquateApprox(0, 0.0001))
+		if diff != "" {
+			t.Errorf("Ray.At(%v) mismatch: (-want +got):\n%s", tc.tt, diff)
 		}
 	}
 }

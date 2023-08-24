@@ -1,11 +1,13 @@
 package raytracer
 
+import "github.com/clfs/m/math/f64"
+
 type Ray struct {
-	Origin, Direction Vec3
+	Origin    f64.Vec3
+	Direction f64.Vec3
 }
 
-func (r Ray) At(t float64) *Vec3 {
-	var v Vec3
-	// v = r.Origin + r.Direction * t
-	return v.Add(&r.Origin, v.SMul(&r.Direction, t))
+func (r Ray) At(t float64) f64.Vec3 {
+	// r.Origin + r.Direction * t
+	return r.Origin.Add(r.Direction.SMul(t))
 }
