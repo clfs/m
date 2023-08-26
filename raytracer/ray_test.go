@@ -18,11 +18,11 @@ func TestRay_At(t *testing.T) {
 		{Ray{f64.Vec3{1, 2, 3}, f64.Vec3{-4, 5, 8}}, 3, f64.Vec3{-11, 17, 27}},
 	}
 
-	for _, tc := range cases {
+	for i, tc := range cases {
 		got := tc.r.At(tc.tt)
 		diff := cmp.Diff(tc.want, got, cmpopts.EquateApprox(0, 0.0001))
 		if diff != "" {
-			t.Errorf("Ray.At(%v) mismatch: (-want +got):\n%s", tc.tt, diff)
+			t.Errorf("#%d: mismatch: (-want +got):\n%s", i, diff)
 		}
 	}
 }
