@@ -2,11 +2,11 @@ package f64
 
 import "testing"
 
-func TestVec3_Negation(t *testing.T) {
+func TestVec3_Neg(t *testing.T) {
 	v := Vec3{1, 2, 3}
 	want := Vec3{-1, -2, -3}
-	if got := v.Negation(); got != want {
-		t.Errorf("%v.Negation() = %v, want %v", v, got, want)
+	if got := v.Neg(); got != want {
+		t.Errorf("%v.Neg() = %v, want %v", v, got, want)
 	}
 }
 
