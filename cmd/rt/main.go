@@ -5,13 +5,17 @@ import (
 	"log"
 	"os"
 
+	"github.com/clfs/m/math/f64"
 	"github.com/clfs/m/raytracer"
 )
 
 func main() {
 	cfg := raytracer.Config{
-		ImageHeight: 256,
-		ImageWidth:  256,
+		AspectRatio:    16.0 / 9.0,
+		ImageWidth:     400,
+		FocalLength:    1.0,
+		ViewportHeight: 2.0,
+		CameraCenter:   f64.Vec3{0, 0, 0},
 	}
 
 	img := raytracer.Render(cfg)
