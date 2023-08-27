@@ -5,8 +5,8 @@ import "math"
 // Vec3 is a 3-element vector.
 type Vec3 [3]float64
 
-// Negation returns -v.
-func (v Vec3) Negation() Vec3 {
+// Neg returns -v.
+func (v Vec3) Neg() Vec3 {
 	return Vec3{-v[0], -v[1], -v[2]}
 }
 
