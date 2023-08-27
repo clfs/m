@@ -18,7 +18,20 @@ type Config struct {
 	CameraCenter   f64.Vec3
 }
 
+func hitSphere(center f64.Vec3, radius float64, r Ray) bool {
+	oc := r.Origin.Sub(center)
+	a := r.Direction.Dot(r.Direction)
+	b := 2 * oc.Dot(r.Direction)
+	c := oc.Dot(oc) - radius*radius
+	discriminant := b*b - 4*a*c
+	return discriminant >= 0
+}
+
 func rayColor(r Ray) color.RGBA {
+	if hitSphere(f64.Vec3{0, 0, -1}, 0.5, r) {
+		return color.RGBA{255, 0, 0, 255}
+	}
+
 	unitDirection := r.Direction.Unit()
 	a := 0.5 * (unitDirection[1] + 1)
 
