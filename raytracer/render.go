@@ -30,27 +30,14 @@ func rgbaFrom(v f64.Vec3) color.RGBA {
 	}
 }
 
-func hitSphere(center f64.Vec3, radius float64, r Ray) float64 {
-	oc := r.Origin.Sub(center)
-	a := r.Direction.Dot(r.Direction)
-	b := 2 * oc.Dot(r.Direction)
-	c := oc.Dot(oc) - radius*radius
-	discriminant := b*b - 4*a*c
-	if discriminant < 0 {
-		return -1
-	}
-	return (-b - math.Sqrt(discriminant)) / (2 * a)
-}
-
-func rayColor(r Ray) color.RGBA {
-	t := hitSphere(f64.Vec3{0, 0, -1}, 0.5, r)
-	if t > 0 {
-		unitNormal := r.At(t).Sub(f64.Vec3{0, 0, -1}).Unit()
+func rayColor(world Hittable, ray Ray) color.RGBA {
+	var rec HitRecord
+	if world.Hit(&rec, ray, 0, math.Inf(1)) {
 		// = 0.5 * (<X, Y, Z> + <1, 1, 1>)
-		return rgbaFrom(unitNormal.Add(f64.Vec3{1, 1, 1}).SMul(0.5))
+		return rgbaFrom(rec.Normal.Add(f64.Vec3{1, 1, 1}).SMul(0.5))
 	}
 
-	unitDirection := r.Direction.Unit()
+	unitDirection := ray.Direction.Unit()
 	a := 0.5 * (unitDirection[1] + 1)
 
 	// = (1 - a) * <1, 1, 1> + a * <0.5, 0.7, 1>
@@ -60,6 +47,11 @@ func rayColor(r Ray) color.RGBA {
 
 func Render(c Config) image.Image {
 	imageHeight := max(1, int(float64(c.ImageWidth)/c.AspectRatio))
+
+	world := Hittables{
+		Sphere{f64.Vec3{0, 0, -1}, 0.5},
+		Sphere{f64.Vec3{0, -100.5, -1}, 100},
+	}
 
 	viewportWidth := c.ViewportHeight * (float64(c.ImageWidth) / float64(imageHeight))
 
@@ -90,7 +82,7 @@ func Render(c Config) image.Image {
 			rayDirection := pixelCenter.Sub(c.CameraCenter)
 
 			ray := Ray{c.CameraCenter, rayDirection}
-			pixelColor := rayColor(ray)
+			pixelColor := rayColor(world, ray)
 
 			img.SetRGBA(i, j, pixelColor)
 		}
