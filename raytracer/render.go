@@ -22,7 +22,7 @@ type Config struct {
 func hitSphere(center f64.Vec3, radius float64, r Ray) float64 {
 	oc := r.Origin.Sub(center)
 	a := r.Direction.Dot(r.Direction)
-	b := 2.0 * oc.Dot(r.Direction)
+	b := 2 * oc.Dot(r.Direction)
 	c := oc.Dot(oc) - radius*radius
 	discriminant := b*b - 4*a*c
 	if discriminant < 0 {
