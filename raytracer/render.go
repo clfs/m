@@ -19,7 +19,7 @@ type Config struct {
 	CameraCenter   f64.Vec3
 }
 
-// rgbaFrom converts a f64.Vec3 in the unit cube to a color.RGBA.
+// rgbaFrom converts a vector in the unit cube to an RGBA color.
 // Alpha is fixed at 255.
 func rgbaFrom(v f64.Vec3) color.RGBA {
 	return color.RGBA{
