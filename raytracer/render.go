@@ -19,6 +19,17 @@ type Config struct {
 	CameraCenter   f64.Vec3
 }
 
+// rgbaFrom converts a f64.Vec3 in the unit cube to a color.RGBA.
+// Alpha is fixed at 255.
+func rgbaFrom(v f64.Vec3) color.RGBA {
+	return color.RGBA{
+		R: uint8(255.999 * v[0]),
+		G: uint8(255.999 * v[1]),
+		B: uint8(255.999 * v[2]),
+		A: 255,
+	}
+}
+
 func hitSphere(center f64.Vec3, radius float64, r Ray) float64 {
 	oc := r.Origin.Sub(center)
 	a := r.Direction.Dot(r.Direction)
@@ -34,15 +45,9 @@ func hitSphere(center f64.Vec3, radius float64, r Ray) float64 {
 func rayColor(r Ray) color.RGBA {
 	t := hitSphere(f64.Vec3{0, 0, -1}, 0.5, r)
 	if t > 0 {
-		// = (At(t) - <0, 0, -1>).Unit()
 		unitNormal := r.At(t).Sub(f64.Vec3{0, 0, -1}).Unit()
 		// = 0.5 * (<X, Y, Z> + <1, 1, 1>)
-		return color.RGBA{
-			R: uint8(255 * (0.5 * (unitNormal[0] + 1))),
-			G: uint8(255 * (0.5 * (unitNormal[1] + 1))),
-			B: uint8(255 * (0.5 * (unitNormal[2] + 1))),
-			A: 255,
-		}
+		return rgbaFrom(unitNormal.Add(f64.Vec3{1, 1, 1}).SMul(0.5))
 	}
 
 	unitDirection := r.Direction.Unit()
@@ -50,13 +55,7 @@ func rayColor(r Ray) color.RGBA {
 
 	// = (1 - a) * <1, 1, 1> + a * <0.5, 0.7, 1>
 	v := f64.Vec3{1, 1, 1}.SMul(1 - a).Add(f64.Vec3{0.5, 0.7, 1}.SMul(a))
-
-	return color.RGBA{
-		R: uint8(255 * v[0]),
-		G: uint8(255 * v[1]),
-		B: uint8(255 * v[2]),
-		A: 255,
-	}
+	return rgbaFrom(v)
 }
 
 func Render(c Config) image.Image {
