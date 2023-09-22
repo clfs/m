@@ -25,8 +25,8 @@ func main() {
 		log.Fatalf("error: %v", err)
 	}
 
-	source := rand.New(rand.NewSource(*seed))
-	perm := source.Perm(len(lines))
+	rng := rand.New(rand.NewSource(*seed))
+	perm := rng.Perm(len(lines))
 
 	for _, i := range perm {
 		fmt.Println(lines[i])
