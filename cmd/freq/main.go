@@ -9,29 +9,31 @@ import (
 	"slices"
 )
 
+type mode struct {
+	splitFunc bufio.SplitFunc
+	format    string
+}
+
+var supportedModes = map[string]mode{
+	"line": {bufio.ScanLines, "%d\t%s\n"},
+	"byte": {bufio.ScanBytes, "%d\t0x%02x\n"},
+	"rune": {bufio.ScanRunes, "%d\t%q\n"},
+	"word": {bufio.ScanWords, "%d\t%s\n"},
+}
+
 func main() {
 	log.SetFlags(0)
 
 	byFlag := flag.String("by", "line", "line, byte, rune, or word")
 	flag.Parse()
 
-	var splitFunc bufio.SplitFunc
-
-	switch *byFlag {
-	case "line":
-		splitFunc = bufio.ScanLines
-	case "byte":
-		splitFunc = bufio.ScanBytes
-	case "rune":
-		splitFunc = bufio.ScanRunes
-	case "word":
-		splitFunc = bufio.ScanWords
-	default:
+	byMode, ok := supportedModes[*byFlag]
+	if !ok {
 		log.Fatalln("error: invalid -by value")
 	}
 
 	s := bufio.NewScanner(os.Stdin)
-	s.Split(splitFunc)
+	s.Split(byMode.splitFunc)
 
 	m := make(map[string]int)
 	for s.Scan() {
@@ -41,26 +43,11 @@ func main() {
 		log.Fatalf("error: %v", err)
 	}
 
-	var format string
-
-	switch *byFlag {
-	case "line":
-		format = "%d\t%s\n"
-	case "byte":
-		format = "%d\t0x%02x\n"
-	case "rune":
-		format = "%d\t%q\n"
-	case "word":
-		format = "%d\t%s\n"
-	default:
-		panic("unreachable")
-	}
-
 	pairs := toPairs(m)
 	slices.SortFunc(pairs, cmp)
 
 	for _, e := range pairs {
-		fmt.Printf(format, e.count, e.value)
+		fmt.Printf(byMode.format, e.count, e.value)
 	}
 }
 
