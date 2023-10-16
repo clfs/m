@@ -35,19 +35,19 @@ func main() {
 	s := bufio.NewScanner(os.Stdin)
 	s.Split(byMode.splitFunc)
 
-	freqDist := make(map[string]int)
+	m := make(map[string]int)
 	for s.Scan() {
-		freqDist[s.Text()]++
+		m[s.Text()]++
 	}
 	if err := s.Err(); err != nil {
 		log.Fatalf("error: %v", err)
 	}
 
-	pairs := toPairs(freqDist)
+	pairs := toPairs(m)
 	slices.SortFunc(pairs, cmp)
 
-	for _, p := range pairs {
-		fmt.Printf(byMode.format, p.count, p.value)
+	for _, e := range pairs {
+		fmt.Printf(byMode.format, e.count, e.value)
 	}
 }
 
