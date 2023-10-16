@@ -32,14 +32,14 @@ func main() {
 		log.Fatalln("error: invalid -by value")
 	}
 
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Split(byMode.splitFunc)
+	s := bufio.NewScanner(os.Stdin)
+	s.Split(byMode.splitFunc)
 
 	freqDist := make(map[string]int)
-	for scanner.Scan() {
-		freqDist[scanner.Text()]++
+	for s.Scan() {
+		freqDist[s.Text()]++
 	}
-	if err := scanner.Err(); err != nil {
+	if err := s.Err(); err != nil {
 		log.Fatalf("error: %v", err)
 	}
 
